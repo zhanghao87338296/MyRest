@@ -61,20 +61,36 @@ public class DBImport {
 				return;
 			}
 			Statement stmt = conn.createStatement();
-			
-			String sql = "DROP TABLE IF EXISTS RESTAURANTS";
+			String sql = "DROP TABLE IF EXISTS USER_VISIT_HISTORY";
 			stmt.executeUpdate(sql);
+			
+			sql = "DROP TABLE IF EXISTS RESTAURANTS";
+			stmt.executeUpdate(sql);
+			
+			sql = "DROP TABLE IF EXISTS USERS";
+			stmt.executeUpdate(sql);
+			
+			sql = "DROP TABLE IF EXISTS USER_REVIEW_HISTORY";
+			stmt.executeUpdate(sql);
+			
+			//Optional
+			/*
+			sql = "DROP TABLE IF EXISTS USER_CATEGORY_HISTORY";
+			stmt.executeUpdate(sql);
+			*/
+			
 			sql = "CREATE TABLE RESTAURANTS "
 					+ "(business_id VARCHAR(255) NOT NULL, "
 					+ " name VARCHAR(255), " + "categories VARCHAR(255), "
 					+ "city VARCHAR(255), " + "state VARCHAR(255), "
 					+ "stars FLOAT," + "full_address VARCHAR(255), "
 					+ "latitude FLOAT, " + " longitude FLOAT, "
+					+ "image_url VARCHAR(255), "
 					+ " PRIMARY KEY ( business_id ))";
 			stmt.executeUpdate(sql);
 
 			BufferedReader reader = new BufferedReader(new FileReader(
-					"../dataset/business_small.json"));
+					"/Users/weiweich/Documents/Lai/dataset/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_business.json"));
 			while ((line = reader.readLine()) != null) {
 				JSONObject restaurant = new JSONObject(line);
 				String business_id = restaurant.getString("business_id");
@@ -88,17 +104,19 @@ public class DBImport {
 				double stars = restaurant.getDouble("stars");
 				double latitude = restaurant.getDouble("latitude");
 				double longitude = restaurant.getDouble("longitude");
+				String imageUrl = "http://www.example.com/img.JPG";
 				sql = "INSERT INTO RESTAURANTS " + "VALUES ('" + business_id
 						+ "', \"" + name + "\", \"" + categories + "\", '"
 						+ city + "', '" + state + "', " + stars + ", \""
 						+ fullAddress + "\", " + latitude + "," + longitude
+						+ ", \"" +imageUrl + "\""
 						+ ")";
 				System.out.println(sql);
 				stmt.executeUpdate(sql);
 			}
+			
+			System.out.println("Done creating restaurant table.");
 
-			sql = "DROP TABLE IF EXISTS USERS";
-			stmt.executeUpdate(sql);
 			sql = "CREATE TABLE USERS "
 					+ "(user_id VARCHAR(255) NOT NULL, "
 					+ " first_name VARCHAR(255), last_name VARCHAR(255), "
@@ -107,8 +125,6 @@ public class DBImport {
 			sql = "INSERT INTO USERS " + "VALUES (\"1111\", \"John\", \"Smith\")";
 			stmt.executeUpdate(sql);
 			
-			sql = "DROP TABLE IF EXISTS USER_VISIT_HISTORY";
-			stmt.executeUpdate(sql);
 			sql = "CREATE TABLE USER_VISIT_HISTORY "
 					+ "(visit_history_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
 					+ " user_id VARCHAR(255) NOT NULL , "
@@ -120,8 +136,41 @@ public class DBImport {
 			stmt.executeUpdate(sql);
 
 			reader.close();
+			
+			reader = new BufferedReader(new FileReader(
+					"/Users/weiweich/Documents/Lai/dataset/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json"));
+			
+			sql = "CREATE TABLE USER_REVIEW_HISTORY "
+					+ "(visit_review_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
+					+ " user_id VARCHAR(255) NOT NULL , "
+					+ " business_id VARCHAR(255) NOT NULL, " 
+					+ " PRIMARY KEY (visit_review_id))";
+			stmt.executeUpdate(sql);
+			
+			//Optional to create category history (takes much time)
+			/*
+			sql = "CREATE TABLE USER_CATEGORY_HISTORY "
+					+ "(category_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
+					+ " first_id VARCHAR(255) NOT NULL , "
+					+ " second_id VARCHAR(255) NOT NULL, "
+					+ " count bigint(20) NOT NULL, "
+					+ " PRIMARY KEY (category_id))";
+			stmt.executeUpdate(sql);
+			
+			while ((line = reader.readLine()) != null) {
+				JSONObject review = new JSONObject(line);
+				String business_id = review.getString("business_id");
+				String user_id = review.getString("user_id");
+				sql = "INSERT INTO USER_REVIEW_HISTORY (`user_id`, `business_id`)" + "VALUES (\"" + user_id
+						+ "\", \"" + business_id + "\")";
+				System.out.println(sql);
+				stmt.executeUpdate(sql);
+			}
+			*/
+			
+			
+			
 			System.out.println("Done Importing");
-
 		} catch (Exception e) { /* report an error */
 			System.out.println(e.getMessage());
 		}

@@ -112,7 +112,7 @@ public class DBConnection {
 	private JSONObject getRestaurantsById(String businessId) {
 		try {
 			Statement stmt = conn.createStatement();
-			String sql = "SELECT business_id, name, full_address, categories, stars, latitude, longitude, city, state from "
+			String sql = "SELECT business_id, name, full_address, categories, stars, latitude, longitude, city, state, image_url from "
 					+ "RESTAURANTS where business_id='" + businessId + "'" + " ORDER BY stars DESC";
 			ResultSet rs = stmt.executeQuery(sql);
 			if (rs.next()) {
@@ -127,6 +127,7 @@ public class DBConnection {
 				obj.append("state", rs.getString("state"));
 				obj.append("categories",
 						DBImport.stringToJSONArray(rs.getString("categories")));
+				obj.append("image_url", rs.getString("image_url"));
 				return obj;
 			}
 		} catch (Exception e) { /* report an error */
@@ -224,6 +225,7 @@ public class DBConnection {
 				double stars = restaurant.getStars();
 				double latitude = restaurant.getLatitude();
 				double longitude = restaurant.getLongitude();
+				String imageUrl = restaurant.getImageUrl();
 				JSONObject obj = new JSONObject();
 				obj.append("business_id", business_id);
 				obj.append("name", name);
@@ -234,11 +236,12 @@ public class DBConnection {
 				obj.append("city", city);
 				obj.append("state", state);
 				obj.append("categories", categories);
+				obj.append("image_url", imageUrl);
 				sql = "INSERT IGNORE INTO RESTAURANTS " + "VALUES ('"
 						+ business_id + "', \"" + name + "\", \"" + categories
 						+ "\", '" + city + "', '" + state + "', " + stars
 						+ ", \"" + fullAddress + "\", " + latitude + ","
-						+ longitude + ")";
+						+ longitude + ",\"" + imageUrl + "\")";
 				System.out.println(sql);
 				stmt.executeUpdate(sql);
 				list.add(obj);
