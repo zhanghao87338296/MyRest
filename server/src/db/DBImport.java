@@ -90,7 +90,7 @@ public class DBImport {
 			stmt.executeUpdate(sql);
 
 			BufferedReader reader = new BufferedReader(new FileReader(
-					"/Users/weiweich/Documents/Lai/dataset/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_business.json"));
+					"../dataset/yelp_academic_dataset_business.json"));
 			while ((line = reader.readLine()) != null) {
 				JSONObject restaurant = new JSONObject(line);
 				String business_id = restaurant.getString("business_id");
@@ -138,7 +138,7 @@ public class DBImport {
 			reader.close();
 			
 			reader = new BufferedReader(new FileReader(
-					"/Users/weiweich/Documents/Lai/dataset/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json"));
+					"../dataset/yelp_academic_dataset_review.json"));
 			
 			sql = "CREATE TABLE USER_REVIEW_HISTORY "
 					+ "(visit_review_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "

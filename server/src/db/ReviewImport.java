@@ -27,7 +27,7 @@ public class ReviewImport {
 			}
 			Statement stmt = conn.createStatement();
 			BufferedReader reader = new BufferedReader(new FileReader(
-					"/Users/weiweich/git/laiproject/dataset/review_post_data"));
+					"../dataset/review_post_data"));
 			String line = null;
 			String sql = null;
 			while ((line = reader.readLine()) != null) {

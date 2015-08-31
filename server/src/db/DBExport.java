@@ -30,7 +30,7 @@ public class DBExport {
 			String sql = "SELECT categories FROM RESTAURANTS AS T1 JOIN USER_REVIEW_HISTORY AS T2 ON T1.business_id = T2.business_id;";
 			ResultSet rs = stmt.executeQuery(sql);
 			BufferedWriter writer = new BufferedWriter(new FileWriter(
-					"/Users/weiweich/Documents/Lai/dataset/yelp_dataset_challenge_academic_dataset/review_data"));
+					"../dataset/review_data"));
 			
 			while (rs.next()) {
 				String categories = rs.getString("categories");
