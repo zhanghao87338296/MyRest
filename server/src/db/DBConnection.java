@@ -18,6 +18,7 @@ import yelp.YelpAPI;
 public class DBConnection {
 	private Connection conn = null;
 	private static final int MAX_RECOMMENDED_RESTAURANTS = 10;
+	private static final int MIN_RECOMMENDED_RESTAURANTS = 3;
 
 	public DBConnection() {
 		try {
@@ -135,6 +136,34 @@ public class DBConnection {
 		}
 		return null;
 	}
+	
+	private Set<String> getMoreCategories(String category, int maxCount) {
+		Set<String> allCategories = new HashSet<>();
+		try {
+			if (conn == null) {
+				return null;
+			}
+			Statement stmt = conn.createStatement();
+			String sql = "SELECT second_id from USER_CATEGORY_HISTORY WHERE first_id=\""
+					+ category + "\" ORDER BY count DESC LIMIT " + maxCount;
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				String visited_restaurant = rs.getString("second_id");
+				allCategories.add(visited_restaurant);
+			}
+		} catch (Exception e) { /* report an error */
+			System.out.println(e.getMessage());
+		}
+		return allCategories;
+	}
+	
+	private Set<String> getMoreCategories(Set<String> existingCategories) {
+		Set<String> allCategories = new HashSet<>();
+		for (String category : existingCategories) {
+			allCategories.addAll(getMoreCategories(category, 5));
+		}
+		return allCategories;
+	}
 
 	public JSONArray RecommendRestaurants(String userId) {
 		try {
@@ -163,6 +192,24 @@ public class DBConnection {
 					}
 				}
 			}
+			
+			if (count < MIN_RECOMMENDED_RESTAURANTS) {
+				allCategories.addAll(getMoreCategories(allCategories));
+				for (String category : allCategories) {
+					Set<String> set = getBusinessId(category);
+					allRestaurants.addAll(set);
+				}
+				for (String business_id : allRestaurants) {
+					if (!visitedRestaurants.contains(business_id)) {
+						diff.add(getRestaurantsById(business_id));
+						count++;
+						if (count >= MAX_RECOMMENDED_RESTAURANTS) {
+							break;
+						}
+					}
+				}
+			}		
+			
 			return new JSONArray(diff);
 		} catch (Exception e) { /* report an error */
 			System.out.println(e.getMessage());

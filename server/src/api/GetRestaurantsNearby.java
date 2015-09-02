@@ -45,7 +45,8 @@ public class GetRestaurantsNearby extends HttpServlet {
 		}
 		JSONObject obj = new JSONObject();
 		try {
-			obj.append("username", username);
+			obj.put("username", username);
+			obj.put("name", "panda");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

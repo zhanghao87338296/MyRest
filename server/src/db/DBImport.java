@@ -49,6 +49,7 @@ public class DBImport {
 			String line = null;
 
 			try {
+				// default password is "password"
 				conn = DriverManager
 						.getConnection("jdbc:mysql://localhost:3306/mysql?"
 								+ "user=root&password=root");
@@ -60,6 +61,7 @@ public class DBImport {
 			if (conn == null) {
 				return;
 			}
+			//Step 1 Drop tables. 
 			Statement stmt = conn.createStatement();
 			String sql = "DROP TABLE IF EXISTS USER_VISIT_HISTORY";
 			stmt.executeUpdate(sql);
@@ -73,12 +75,11 @@ public class DBImport {
 			sql = "DROP TABLE IF EXISTS USER_REVIEW_HISTORY";
 			stmt.executeUpdate(sql);
 			
-			//Optional
-			/*
 			sql = "DROP TABLE IF EXISTS USER_CATEGORY_HISTORY";
 			stmt.executeUpdate(sql);
-			*/
 			
+			
+			//Step 2: create tables
 			sql = "CREATE TABLE RESTAURANTS "
 					+ "(business_id VARCHAR(255) NOT NULL, "
 					+ " name VARCHAR(255), " + "categories VARCHAR(255), "
@@ -88,7 +89,39 @@ public class DBImport {
 					+ "image_url VARCHAR(255), "
 					+ " PRIMARY KEY ( business_id ))";
 			stmt.executeUpdate(sql);
-
+						
+			sql = "CREATE TABLE USERS "
+					+ "(user_id VARCHAR(255) NOT NULL, "
+					+ " first_name VARCHAR(255), last_name VARCHAR(255), "
+					+ " PRIMARY KEY ( user_id ))";
+			stmt.executeUpdate(sql);
+			
+			sql = "CREATE TABLE USER_VISIT_HISTORY "
+					+ "(visit_history_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
+					+ " user_id VARCHAR(255) NOT NULL , "
+					+ " business_id VARCHAR(255) NOT NULL, " 
+					+ " last_visited_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+					+ " PRIMARY KEY (visit_history_id),"
+					+ "FOREIGN KEY (business_id) REFERENCES RESTAURANTS(business_id),"
+					+ "FOREIGN KEY (user_id) REFERENCES users(user_id))";
+			stmt.executeUpdate(sql);
+			
+			sql = "CREATE TABLE USER_REVIEW_HISTORY "
+					+ "(visit_review_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
+					+ " user_id VARCHAR(255) NOT NULL , "
+					+ " business_id VARCHAR(255) NOT NULL, " 
+					+ " PRIMARY KEY (visit_review_id))";
+			stmt.executeUpdate(sql);
+			
+			sql = "CREATE TABLE USER_CATEGORY_HISTORY "
+					+ "(category_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
+					+ " first_id VARCHAR(255) NOT NULL , "
+					+ " second_id VARCHAR(255) NOT NULL, "
+					+ " count bigint(20) NOT NULL, "
+					+ " PRIMARY KEY (category_id))";
+			stmt.executeUpdate(sql);
+			
+			//Step 3: insert data
 			BufferedReader reader = new BufferedReader(new FileReader(
 					"../dataset/yelp_academic_dataset_business.json"));
 			while ((line = reader.readLine()) != null) {
@@ -114,49 +147,16 @@ public class DBImport {
 				System.out.println(sql);
 				stmt.executeUpdate(sql);
 			}
-			
-			System.out.println("Done creating restaurant table.");
-
-			sql = "CREATE TABLE USERS "
-					+ "(user_id VARCHAR(255) NOT NULL, "
-					+ " first_name VARCHAR(255), last_name VARCHAR(255), "
-					+ " PRIMARY KEY ( user_id ))";
-			stmt.executeUpdate(sql);
-			sql = "INSERT INTO USERS " + "VALUES (\"1111\", \"John\", \"Smith\")";
-			stmt.executeUpdate(sql);
-			
-			sql = "CREATE TABLE USER_VISIT_HISTORY "
-					+ "(visit_history_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
-					+ " user_id VARCHAR(255) NOT NULL , "
-					+ " business_id VARCHAR(255) NOT NULL, " 
-					+ " last_visited_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-					+ " PRIMARY KEY (visit_history_id),"
-					+ "FOREIGN KEY (business_id) REFERENCES RESTAURANTS(business_id),"
-					+ "FOREIGN KEY (user_id) REFERENCES users(user_id))";
-			stmt.executeUpdate(sql);
-
 			reader.close();
 			
-			reader = new BufferedReader(new FileReader(
-					"../dataset/yelp_academic_dataset_review.json"));
-			
-			sql = "CREATE TABLE USER_REVIEW_HISTORY "
-					+ "(visit_review_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
-					+ " user_id VARCHAR(255) NOT NULL , "
-					+ " business_id VARCHAR(255) NOT NULL, " 
-					+ " PRIMARY KEY (visit_review_id))";
+			sql = "INSERT INTO USERS " + "VALUES (\"1111\", \"John\", \"Smith\")";
 			stmt.executeUpdate(sql);
 			
 			//Optional to create category history (takes much time)
 			/*
-			sql = "CREATE TABLE USER_CATEGORY_HISTORY "
-					+ "(category_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
-					+ " first_id VARCHAR(255) NOT NULL , "
-					+ " second_id VARCHAR(255) NOT NULL, "
-					+ " count bigint(20) NOT NULL, "
-					+ " PRIMARY KEY (category_id))";
-			stmt.executeUpdate(sql);
-			
+			reader = new BufferedReader(new FileReader(
+					"../dataset/yelp_academic_dataset_review.json"));	
+
 			while ((line = reader.readLine()) != null) {
 				JSONObject review = new JSONObject(line);
 				String business_id = review.getString("business_id");
@@ -167,8 +167,6 @@ public class DBImport {
 				stmt.executeUpdate(sql);
 			}
 			*/
-			
-			
 			
 			System.out.println("Done Importing");
 		} catch (Exception e) { /* report an error */

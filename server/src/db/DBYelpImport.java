@@ -92,6 +92,17 @@ public class DBYelpImport {
 					+ "FOREIGN KEY (business_id) REFERENCES RESTAURANTS(business_id),"
 					+ "FOREIGN KEY (user_id) REFERENCES users(user_id))";
 			stmt.executeUpdate(sql);
+			
+			sql = "DROP TABLE IF EXISTS USER_CATEGORY_HISTORY";
+			stmt.executeUpdate(sql);
+			
+			sql = "CREATE TABLE USER_CATEGORY_HISTORY "
+					+ "(category_id bigint(20) unsigned NOT NULL AUTO_INCREMENT, "
+					+ " first_id VARCHAR(255) NOT NULL , "
+					+ " second_id VARCHAR(255) NOT NULL, "
+					+ " count bigint(20) NOT NULL, "
+					+ " PRIMARY KEY (category_id))";
+			stmt.executeUpdate(sql);
 
 			System.out.println("Done Importing");
 
