@@ -332,7 +332,8 @@ public class DBConnection {
 	}
 	
 	public static void main(String[] args) {
-		DBConnection conn = new DBConnection();
+		//This is for test purpose
+		DBConnection conn = new DBConnection("jdbc:mysql://localhost:3306/mysql?user=root&password=root");
 		JSONArray array = conn.GetRestaurantsNearLoationViaYelpAPI(1.0, 2.0);
 	}
 }
