@@ -20,15 +20,21 @@ public class DBConnection {
 	private static final int MAX_RECOMMENDED_RESTAURANTS = 10;
 	private static final int MIN_RECOMMENDED_RESTAURANTS = 3;
 
-	public DBConnection() {
+	public DBConnection(String url) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			conn = DriverManager
-					.getConnection("jdbc:mysql://localhost:3306/mysql?"
-							+ "user=root&password=root");
+			conn = DriverManager.getConnection(url);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void close(){
+	    if (conn != null) {
+	        try {
+	        	conn.close();
+	        } catch (Exception e) { /* ignored */}
+	    }
 	}
 
 	public void SetVisitedRestaurants(String userId, List<String> businessIds) {
@@ -41,6 +47,24 @@ public class DBConnection {
 			for (String businessId : businessIds) {
 				sql = "INSERT INTO USER_VISIT_HISTORY (`user_id`, `business_id`) VALUES (\""
 						+ userId + "\", \"" + businessId + "\")";
+				stmt.executeUpdate(sql);
+			}
+
+		} catch (Exception e) { /* report an error */
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public void UnsetVisitedRestaurants(String userId, List<String> businessIds) {
+		try {
+			if (conn == null) {
+				return;
+			}
+			Statement stmt = conn.createStatement();
+			String sql = "";
+			for (String businessId : businessIds) {
+				sql = "DELETE FROM USER_VISIT_HISTORY WHERE `user_id`=\"" + userId + "\" and `business_id` = \""
+						+ businessId + "\"";
 				stmt.executeUpdate(sql);
 			}
 
@@ -118,17 +142,17 @@ public class DBConnection {
 			ResultSet rs = stmt.executeQuery(sql);
 			if (rs.next()) {
 				JSONObject obj = new JSONObject();
-				obj.append("business_id", rs.getString("business_id"));
-				obj.append("name", rs.getString("name"));
-				obj.append("stars", rs.getFloat("stars"));
-				obj.append("latitude", rs.getFloat("latitude"));
-				obj.append("longitude", rs.getFloat("longitude"));
-				obj.append("full_address", rs.getString("full_address"));
-				obj.append("city", rs.getString("city"));
-				obj.append("state", rs.getString("state"));
-				obj.append("categories",
+				obj.put("business_id", rs.getString("business_id"));
+				obj.put("name", rs.getString("name"));
+				obj.put("stars", rs.getFloat("stars"));
+				obj.put("latitude", rs.getFloat("latitude"));
+				obj.put("longitude", rs.getFloat("longitude"));
+				obj.put("full_address", rs.getString("full_address"));
+				obj.put("city", rs.getString("city"));
+				obj.put("state", rs.getString("state"));
+				obj.put("categories",
 						DBImport.stringToJSONArray(rs.getString("categories")));
-				obj.append("image_url", rs.getString("image_url"));
+				obj.put("image_url", rs.getString("image_url"));
 				return obj;
 			}
 		} catch (Exception e) { /* report an error */
@@ -228,15 +252,15 @@ public class DBConnection {
 			List<JSONObject> list = new ArrayList<JSONObject>();
 			while (rs.next()) {
 				JSONObject obj = new JSONObject();
-				obj.append("business_id", rs.getString("business_id"));
-				obj.append("name", rs.getString("name"));
-				obj.append("stars", rs.getFloat("stars"));
-				obj.append("latitude", rs.getFloat("latitude"));
-				obj.append("longitude", rs.getFloat("longitude"));
-				obj.append("full_address", rs.getString("full_address"));
-				obj.append("city", rs.getString("city"));
-				obj.append("state", rs.getString("state"));
-				obj.append("categories",
+				obj.put("business_id", rs.getString("business_id"));
+				obj.put("name", rs.getString("name"));
+				obj.put("stars", rs.getFloat("stars"));
+				obj.put("latitude", rs.getFloat("latitude"));
+				obj.put("longitude", rs.getFloat("longitude"));
+				obj.put("full_address", rs.getString("full_address"));
+				obj.put("city", rs.getString("city"));
+				obj.put("state", rs.getString("state"));
+				obj.put("categories",
 						DBImport.stringToJSONArray(rs.getString("categories")));
 				list.add(obj);
 			}
@@ -274,16 +298,16 @@ public class DBConnection {
 				double longitude = restaurant.getLongitude();
 				String imageUrl = restaurant.getImageUrl();
 				JSONObject obj = new JSONObject();
-				obj.append("business_id", business_id);
-				obj.append("name", name);
-				obj.append("stars", stars);
-				obj.append("latitude", latitude);
-				obj.append("longitude", longitude);
-				obj.append("full_address", fullAddress);
-				obj.append("city", city);
-				obj.append("state", state);
-				obj.append("categories", categories);
-				obj.append("image_url", imageUrl);
+				obj.put("business_id", business_id);
+				obj.put("name", name);
+				obj.put("stars", stars);
+				obj.put("latitude", latitude);
+				obj.put("longitude", longitude);
+				obj.put("full_address", fullAddress);
+				obj.put("city", city);
+				obj.put("state", state);
+				obj.put("categories", categories);
+				obj.put("image_url", imageUrl);
 				sql = "INSERT IGNORE INTO RESTAURANTS " + "VALUES ('"
 						+ business_id + "', \"" + name + "\", \"" + categories
 						+ "\", '" + city + "', '" + state + "', " + stars
