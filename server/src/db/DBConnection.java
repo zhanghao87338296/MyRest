@@ -3,6 +3,7 @@ package db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,6 +63,7 @@ public class DBConnection {
 				Set<String> set = new HashSet<>();
 				String[] categories = rs.getString("categories").split(",");
 				for (String category : categories) {
+					// ' Japanese ' -> 'Japanese'
 					set.add(category.trim());
 				}
 				return set;
@@ -79,6 +81,7 @@ public class DBConnection {
 				return null;
 			}
 			Statement stmt = conn.createStatement();
+			// if category = Chinese, categories = Chinese, Korean, Japanese, it's a match
 			String sql = "SELECT business_id from RESTAURANTS WHERE categories LIKE '%"
 					+ category + "%'";
 			ResultSet rs = stmt.executeQuery(sql);
@@ -139,11 +142,13 @@ public class DBConnection {
 	
 	private Set<String> getMoreCategories(String category, int maxCount) {
 		Set<String> allCategories = new HashSet<>();
+		if (conn == null) {
+			return null;
+		}
+		Statement stmt;
 		try {
-			if (conn == null) {
-				return null;
-			}
-			Statement stmt = conn.createStatement();
+			stmt = conn.createStatement();
+
 			String sql = "SELECT second_id from USER_CATEGORY_HISTORY WHERE first_id=\""
 					+ category + "\" ORDER BY count DESC LIMIT " + maxCount;
 			ResultSet rs = stmt.executeQuery(sql);
@@ -151,8 +156,9 @@ public class DBConnection {
 				String visited_restaurant = rs.getString("second_id");
 				allCategories.add(visited_restaurant);
 			}
-		} catch (Exception e) { /* report an error */
-			System.out.println(e.getMessage());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return allCategories;
 	}
@@ -184,6 +190,7 @@ public class DBConnection {
 			Set<JSONObject> diff = new HashSet<>();
 			int count = 0;
 			for (String business_id : allRestaurants) {
+				// Perform filtering
 				if (!visitedRestaurants.contains(business_id)) {
 					diff.add(getRestaurantsById(business_id));
 					count++;
@@ -298,5 +305,10 @@ public class DBConnection {
 			System.out.println(e.getMessage());
 		}
 		return null;
+	}
+	
+	public static void main(String[] args) {
+		DBConnection conn = new DBConnection();
+		JSONArray array = conn.GetRestaurantsNearLoationViaYelpAPI(1.0, 2.0);
 	}
 }
