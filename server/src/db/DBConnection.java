@@ -120,7 +120,7 @@ public class DBConnection {
 		return set;
 	}
 
-	private Set<String> getVisitedRestaurants(String userId) {
+	public Set<String> getVisitedRestaurants(String userId) {
 		Set<String> visitedRestaurants = new HashSet<String>();
 		try {
 			Statement stmt = conn.createStatement();
