@@ -1,3 +1,3 @@
-# laiproject
-Laioffer Intern Project
+# Academic Project
 # MyRest
+# Edit by Hao Zhang
