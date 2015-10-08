@@ -22,7 +22,7 @@ import db.DBConnection;
 @WebServlet(description = "Get Restaurants near a location with latitude and longitude", urlPatterns = { "/GetRestaurantsNearby" })
 public class GetRestaurantsNearby extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private static final DBConnection connection = new DBConnection("jdbc:mysql://localhost:3306/mysql?user=root&password=root");
+	private static final DBConnection connection = new DBConnection("jdbc:mysql://ec2-54-215-130-128.us-west-1.compute.amazonaws.com:3306/mysql?user=root&password=root");
 
 	/**
 	 * @see HttpServlet#HttpServlet()
